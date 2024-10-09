@@ -81,7 +81,6 @@ if positional_arguments:
     if REVERSE:
         fields = list(reversed(fields))
 
-
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()
 else:

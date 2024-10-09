@@ -7,7 +7,6 @@ import os
 import sys
 import string
 
-PRE = ""
 EXPRESSION = False
 SEPARATOR = ""
 SKIP_HEADER = False
@@ -35,7 +34,7 @@ for option in options:
     option = option[0]
 
     if option == "-h" or option == "--help":
-        print("Usage: pre [OPTION]... PREFIX [FILE]")
+        print("Usage: pre [OPTION]... [PREFIX] [FILE]")
         print("Add PREFIX before each line of input")
         print()
         print("  -e, --expression     execute PREFIX as a shell command for each line")
@@ -48,7 +47,7 @@ for option in options:
         print("For full documentation, try 'man pre'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("pre (TextUtils) v1.0.0")
+        print("pre (DSVUtils) v1.0.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
@@ -67,20 +66,23 @@ for option in options:
     elif option == "-t" or option == "--tab":
         SEPARATOR = "\t"
 
-if not positional_arguments or len(positional_arguments) == 1:
-    if stat.S_ISFIFO(os.fstat(0).st_mode):
-        input_file = "-"
-    else:
-        print("pre: Missing operand")
-        sys.exit(1)
-    if positional_arguments:
-        PRE = positional_arguments[0]
+if stat.S_ISFIFO(os.fstat(0).st_mode):
+    input_file = "-"
 else:
-    if len(positional_arguments) > 2:
-        print("pre: Too many arguments")
+    if not len(positional_arguments):
+        print(f"pre: Missing operand")
         sys.exit(1)
-    PRE = positional_arguments[0]
-    input_file = positional_arguments[1]
+
+    input_file = positional_arguments.pop()
+
+if positional_arguments:
+    prefix = positional_arguments.pop(0)
+else:
+    prefix = ""
+
+if positional_arguments:
+    print(f"pre: '{positional_arguments[0]}': Extra operand")
+    sys.exit(1)
 
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()
@@ -99,15 +101,14 @@ else:
     with open(input_file, mode="r", encoding="utf8") as text_file:
         all_lines = text_file.read().splitlines()
 
-
 for line in all_lines:
     if SKIP_HEADER:
         SKIP_HEADER = False
         print(line)
         continue
     if EXPRESSION:
-        os.environ["LINE"] = line
-        print(f"{os.popen(PRE).read()[:-1]}{SEPARATOR}{line}")
-        os.environ["LINE"] = ""
+        os.environ["line"] = line
+        print(f"{os.popen(prefix).read()[:-1]}{SEPARATOR}{line}")
+        os.environ["line"] = ""
         continue
-    print(f"{PRE}{SEPARATOR}{line}")
+    print(f"{prefix}{SEPARATOR}{line}")

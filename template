@@ -7,9 +7,11 @@ import os
 import sys
 import string
 
-short_options = "o:hv"
+SEPARATOR = "\t"
+
+short_options = "s:hv"
 long_options = [
-    "option-1=",
+    "separator=",
     "help",
     "version",
 ]
@@ -30,14 +32,16 @@ for option in options:
         print("Usage: TOOL_NAME [OPTION]... [FILE]")
         print("Does important things")
         print()
-        print("  -o, --option-1=VALUE    set option 1 to VALUE")
-        print("  -h, --help              display this help and exit")
-        print("  -v, --version           display version information and exit")
+        print(
+            "  -s, --separator=SEPARATOR    use SEPARATOR instead of tab to separate fields"
+        )
+        print("  -h, --help                   display this help and exit")
+        print("  -v, --version                display version information and exit")
         print()
         print("For full documentation, try 'man TOOL_NAME'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("TOOL_NAME (TextUtils) v1.0.0")
+        print("TOOL_NAME (DSVUtils) v1.0.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
@@ -47,21 +51,23 @@ for option in options:
         print()
         print("Written by HobbitJack.")
         sys.exit(0)
-    elif option == "-o" or option == "--option-1":
-        option_1 = argument
+    elif option == "-s" or option == "--separator":
+        SEPARATOR = argument
 
-if not positional_arguments:
-    if stat.S_ISFIFO(os.fstat(0).st_mode):
-        input_file = "-"
-    else:
-        print("TOOL_NAME: Missing operand")
-        sys.exit(1)
+if stat.S_ISFIFO(os.fstat(0).st_mode):
+    input_file = "-"
 else:
-    if len(positional_arguments) > 1:
-        print("TOOL_NAME: Too many arguments")
+    if not len(positional_arguments):
+        print(f"TOOL_NAME: Missing operand")
         sys.exit(1)
-    else:
-        input_file = positional_arguments[0]
+
+    input_file = positional_arguments.pop(
+        0
+    )  # Either use or don't use 0 here (if has multiple types of positional arguments)
+
+if positional_arguments:
+    print(f"TOOL_NAME: '{positional_arguments[0]}': Extra operand")
+    sys.exit(1)
 
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()

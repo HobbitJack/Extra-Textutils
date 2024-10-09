@@ -1,0 +1,64 @@
+needs_arg() { if [ -z "$OPTARG" ]; then toolkit-exit -eH "$TOOLNAME" "option $OPT requires an argument"; exit 1; fi; }
+needs_no_arg() { if [ ! -z "$OPTARG" ]; then toolkit-exit -eH "$TOOLNAME" "option $OPT doesn't allow an argument"; exit 1; fi; }
+
+OPTS="hv"
+
+while getopts "$OPTS" OPT &> /dev/null;
+do
+    LONGARG="-"
+
+    if [ "$OPT" = ":" ]
+    then
+        OPT="$OPTARG"
+        OPTARG=""
+    fi
+    
+    if [ "$OPT" = "-" ]
+    then
+        LONGARG="--"
+        OPT="${OPTARG%%=*}"
+        OPTARG="${OPTARG#"$OPT"}"
+        OPTARG="${OPTARG#=}"
+    elif [ "${OPTARG%"${OPTARG#?}"}" = "=" ]
+    then
+        OPTARG="${OPTARG#=}"
+    fi
+    
+    OPT="${LONGARG}${OPT}"
+    
+    case "$OPT" in
+        -h|--help)
+            needs_no_arg
+            echo "Usage: twr [OPTION]..."
+            echo "Type text to stdout with readline features"
+            echo
+            echo "  -h, --help     display this help and exit"
+            echo "  -v, --version  display version information and exit"
+            echo
+            echo "For full documentation, try 'man twr'."
+            exit 0
+            ;;
+        -v|--version)
+            needs_no_arg
+            echo "twr (TextUtils) v1.0.0"
+            echo "Copyright (C) 2024 HobbitJack."
+            echo "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
+            echo "This is free software: you are free to change and redistribute it."
+            echo "There is NO WARRANTY, to the extent permitted by law."
+            echo
+            echo "Written by HobbitJack."
+            exit 0
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+
+while [ 0 ]
+do
+    if ! read -e TEXT
+    then
+        exit 0
+    fi
+    echo -e "$TEXT"
+done

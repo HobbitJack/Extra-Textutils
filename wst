@@ -1,0 +1,130 @@
+#!/usr/bin/python
+# Strip whitespace from a line
+
+import getopt
+import stat
+import os
+import sys
+import string
+
+short_options = "f:Fs:hv"
+long_options = [
+    "fields=",
+    "fields-all",
+    "separator=",
+    "help",
+    "version",
+]
+
+FIELDS = False
+FIELDS_ALL = True
+SEPARATOR = "\t"
+
+try:
+    options, positional_arguments = getopt.gnu_getopt(
+        sys.argv[1:], short_options, long_options
+    )
+except getopt.GetoptError as error:
+    print(f"wst: '-{error.opt}': Option not recognized")
+    sys.exit(1)
+
+for option in options:
+    argument = option[1]
+    option = option[0]
+
+    if option == "-h" or option == "--help":
+        print("Usage: wst [OPTION]... [FILE]")
+        print("Strip leading and trailing whitespace from lines in a file")
+        print()
+        print("  -h, --help     display this help and exit")
+        print("  -v, --version  display version information and exit")
+        print()
+        print("For full documentation, try 'man wst'.")
+        sys.exit(0)
+    elif option == "-v" or option == "--version":
+        print("wst (TextUtils) v1.0.0")
+        print("Copyright (C) 2024 HobbitJack.")
+        print(
+            "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
+        )
+        print("This is free software: you are free to change and redistribute it.")
+        print("There is NO WARRANTY, to the extent permitted by law.")
+        print()
+        print("Written by HobbitJack.")
+        sys.exit(0)
+    elif option == "-f" or option == "--fields":
+        FIELDS = [field.strip() for field in argument.split(",")]
+        try:
+            new_fields = []
+            for field in FIELDS:
+                if "-" in field:
+                    new_fields.append(
+                        int(i)
+                        for i in range(
+                            int(field.split("-")[0]), int(field.split("-")[1])
+                        )
+                    )
+                else:
+                    new_fields.append(int(field))
+            FIELDS = new_fields
+        except ValueError:
+            print(f"wst: {argument}: Invalid field value")
+            sys.exit(1)
+    elif option == "-F" or option == "--fields-all":
+        FIELDS_ALL = True
+    elif option == "-s" or option == "--separator":
+        SEPARATOR = argument
+
+if not positional_arguments:
+    if stat.S_ISFIFO(os.fstat(0).st_mode):
+        input_file = "-"
+    else:
+        print("wst: Missing operand")
+        sys.exit(1)
+else:
+    if len(positional_arguments) > 1:
+        print("wst: Too many arguments")
+        sys.exit(1)
+    else:
+        input_file = positional_arguments[0]
+
+if input_file == "-":
+    all_lines = sys.stdin.read().splitlines()
+else:
+    if os.path.isfile(input_file):
+        pass
+    elif os.path.isfile(f"{os.getcwd}/{input_file}"):
+        input_file = f"{os.getcwd}/{input_file}"
+    elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
+        print(f"wst: {input_file}: Is a directory")
+        sys.exit(1)
+    else:
+        print(f"wst: {input_file}: No such file or directory")
+        sys.exit(1)
+
+    with open(input_file, mode="r", encoding="utf8") as text_file:
+        all_lines = text_file.read().splitlines()
+
+for line in all_lines:
+    if FIELDS_ALL:
+        for field, value in enumerate(line.split(SEPARATOR)):
+            field += 1
+            print(value.strip(), end="")
+
+            if field != len(line.split(SEPARATOR)):
+                print(SEPARATOR, end="")
+            else:
+                print()
+    elif FIELDS:
+        for field, value in enumerate(line.split(SEPARATOR)):
+            if (field := field + 1) in FIELDS:
+                print(value.strip(), end="")
+            else:
+                print(value, end="")
+
+            if field != len(line.split(SEPARATOR)):
+                print(SEPARATOR, end="")
+            else:
+                print()
+    else:
+        print(line.strip())

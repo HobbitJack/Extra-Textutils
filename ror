@@ -1,0 +1,103 @@
+#!/usr/bin/python
+# reorder fields in a file
+
+import getopt
+import stat
+import os
+import sys
+import string
+
+SEPARATOR = "\t"
+fields = False
+
+short_options = "s:hv"
+long_options = [
+    "separator=",
+    "help",
+    "version",
+]
+
+try:
+    options, positional_arguments = getopt.gnu_getopt(
+        sys.argv[1:], short_options, long_options
+    )
+except getopt.GetoptError as error:
+    print(f"ror: '-{error.opt}': Option not recognized")
+    sys.exit(1)
+
+for option in options:
+    argument = option[1]
+    option = option[0]
+
+    if option == "-h" or option == "--help":
+        print("Usage: ror [OPTION]... FIELDS [FILE]")
+        print("Re-order fields in a file")
+        print()
+        print(
+            "  -s, --separator=SEPARATOR    use SEPARATOR instead of tab to separate fields"
+        )
+        print("  -h, --help                   display this help and exit")
+        print("  -v, --version                display version information and exit")
+        print()
+        print("For full documentation, try 'man ror'.")
+        sys.exit(0)
+    elif option == "-v" or option == "--version":
+        print("ror (TextUtils) v1.0.0")
+        print("Copyright (C) 2024 HobbitJack.")
+        print(
+            "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
+        )
+        print("This is free software: you are free to change and redistribute it.")
+        print("There is NO WARRANTY, to the extent permitted by law.")
+        print()
+        print("Written by HobbitJack.")
+        sys.exit(0)
+    elif option == "-s" or option == "--separator":
+        SEPARATOR = argument
+
+if stat.S_ISFIFO(os.fstat(0).st_mode):
+    input_file = "-"
+else:
+    if len(positional_arguments) >= 1:
+        input_file = positional_arguments.pop()
+    else:
+        print(f"ror: Missing operand")
+        sys.exit(1)
+
+for field in positional_arguments:
+    try:
+        field = int(field)
+    except ValueError:
+        print(f"ror: {field}: Invalid field")
+        sys.exit(1)
+
+if positional_arguments:
+    fields = list(int(field) for field in positional_arguments)
+
+if input_file == "-":
+    all_lines = sys.stdin.read().splitlines()
+else:
+    if os.path.isfile(input_file):
+        pass
+    elif os.path.isfile(f"{os.getcwd}/{input_file}"):
+        input_file = f"{os.getcwd}/{input_file}"
+    elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
+        print(f"ror: {input_file}: Is a directory")
+        sys.exit(1)
+    else:
+        print(f"ror: {input_file}: No such file or directory")
+        sys.exit(1)
+
+    with open(input_file, mode="r", encoding="utf8") as text_file:
+        all_lines = text_file.read().splitlines()
+
+for line in all_lines:
+    line = line.split(SEPARATOR)
+    if not fields:
+        print(SEPARATOR.join(line))
+        continue
+    print(
+        SEPARATOR.join(
+            line[field - 1] if field <= len(line) else "" for field in fields
+        )
+    )

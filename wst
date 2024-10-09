@@ -7,17 +7,17 @@ import os
 import sys
 import string
 
-short_options = "f:Fs:hv"
+short_options = "fls:hv"
 long_options = [
-    "fields=",
-    "fields-all",
+    "fields",
+    "line",
     "separator=",
     "help",
     "version",
 ]
 
 FIELDS = False
-FIELDS_ALL = True
+LINE_MODE = False
 SEPARATOR = "\t"
 
 try:
@@ -34,10 +34,13 @@ for option in options:
 
     if option == "-h" or option == "--help":
         print("Usage: wst [OPTION]... [FILE]")
-        print("Strip leading and trailing whitespace from lines in a file")
+        print("       wst -f [OPTION]... [FIELD]... [FILE]")
+        print("Strip leading and trailing whitespace from fields in a file")
         print()
-        print("  -h, --help     display this help and exit")
-        print("  -v, --version  display version information and exit")
+        print("  -f, --fields     only strip whitespace from each FIELD, overrides -l")
+        print("  -l, --line       only strip whitespace at start and end of each line")
+        print("  -h, --help       display this help and exit")
+        print("  -v, --version    display version information and exit")
         print()
         print("For full documentation, try 'man wst'.")
         sys.exit(0)
@@ -53,40 +56,36 @@ for option in options:
         print("Written by HobbitJack.")
         sys.exit(0)
     elif option == "-f" or option == "--fields":
-        FIELDS = [field.strip() for field in argument.split(",")]
-        try:
-            new_fields = []
-            for field in FIELDS:
-                if "-" in field:
-                    new_fields.append(
-                        int(i)
-                        for i in range(
-                            int(field.split("-")[0]), int(field.split("-")[1])
-                        )
-                    )
-                else:
-                    new_fields.append(int(field))
-            FIELDS = new_fields
-        except ValueError:
-            print(f"wst: {argument}: Invalid field value")
-            sys.exit(1)
-    elif option == "-F" or option == "--fields-all":
-        FIELDS_ALL = True
+        FIELDS = True
+    elif option == "-l" or option == "--line":
+        LINE_MODE = True
     elif option == "-s" or option == "--separator":
         SEPARATOR = argument
 
-if not positional_arguments:
-    if stat.S_ISFIFO(os.fstat(0).st_mode):
-        input_file = "-"
-    else:
-        print("wst: Missing operand")
-        sys.exit(1)
+if FIELDS and LINE_MODE:
+    LINE_MODE = False
+
+if stat.S_ISFIFO(os.fstat(0).st_mode):
+    input_file = "-"
 else:
-    if len(positional_arguments) > 1:
-        print("wst: Too many arguments")
+    if not len(positional_arguments):
+        print(f"wst: Missing operand")
         sys.exit(1)
-    else:
-        input_file = positional_arguments[0]
+
+    input_file = positional_arguments.pop()
+
+if positional_arguments and not FIELDS:
+    print(f"wst: '{positional_arguments[0]}': Extra operand")
+    sys.exit(1)
+elif FIELDS:
+    FIELDS = [-1]
+
+for field in positional_arguments:
+    try:
+        FIELDS.append(int(field))
+    except ValueError:
+        print(f"wst: {field}: Invalid field")
+        sys.exit(1)
 
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()
@@ -106,15 +105,9 @@ else:
         all_lines = text_file.read().splitlines()
 
 for line in all_lines:
-    if FIELDS_ALL:
-        for field, value in enumerate(line.split(SEPARATOR)):
-            field += 1
-            print(value.strip(), end="")
+    if LINE_MODE:
+        print(line.strip())
 
-            if field != len(line.split(SEPARATOR)):
-                print(SEPARATOR, end="")
-            else:
-                print()
     elif FIELDS:
         for field, value in enumerate(line.split(SEPARATOR)):
             if (field := field + 1) in FIELDS:
@@ -126,5 +119,13 @@ for line in all_lines:
                 print(SEPARATOR, end="")
             else:
                 print()
+
     else:
-        print(line.strip())
+        for field, value in enumerate(line.split(SEPARATOR)):
+            field += 1
+            print(value.strip(), end="")
+
+            if field != len(line.split(SEPARATOR)):
+                print(SEPARATOR, end="")
+            else:
+                print()

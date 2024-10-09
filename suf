@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# add a suf to each input line
+# add a suffix to each input line
 
 import getopt
 import stat
@@ -7,17 +7,16 @@ import os
 import sys
 import string
 
-SUF = ""
-EXPRESSION = False
+EXSUFSSION = False
 SEPARATOR = ""
 SKIP_HEADER = False
 
-
 short_options = "esSthv"
 long_options = [
-    "expression",
+    "exsufssion",
     "space",
-    "skip-header" "tab",
+    "skip-header",
+    "tab",
     "help",
     "version",
 ]
@@ -35,10 +34,10 @@ for option in options:
     option = option[0]
 
     if option == "-h" or option == "--help":
-        print("Usage: suf [OPTION]... SUFFIX [FILE]")
+        print("Usage: suf [OPTION]... [SUFFIX] [FILE]")
         print("Add SUFFIX after each line of input")
         print()
-        print("  -e, --expression     execute SUFFIX as a shell command for each line")
+        print("  -e, --exsufssion     execute SUFFIX as a shell command for each line")
         print("  -s, --space          place a space between SUFFIX and each line")
         print("  -S, --skip-header    do not put SUFFIX on the first line of input")
         print("  -t, --tab            place a tab between SUFFIX and each line")
@@ -48,7 +47,7 @@ for option in options:
         print("For full documentation, try 'man suf'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("suf (TextUtils) v1.0.0")
+        print("suf (DSVUtils) v1.0.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
@@ -58,8 +57,8 @@ for option in options:
         print()
         print("Written by HobbitJack.")
         sys.exit(0)
-    elif option == "-e" or option == "--expression":
-        EXPRESSION = True
+    elif option == "-e" or option == "--exsufssion":
+        EXSUFSSION = True
     elif option == "-s" or option == "--space":
         SEPARATOR = " "
     elif option == "-S" or option == "--skip-header":
@@ -67,20 +66,23 @@ for option in options:
     elif option == "-t" or option == "--tab":
         SEPARATOR = "\t"
 
-if not positional_arguments or len(positional_arguments) == 1:
-    if stat.S_ISFIFO(os.fstat(0).st_mode):
-        input_file = "-"
-    else:
-        print("suf: Missing operand")
-        sys.exit(1)
-    if positional_arguments:
-        SUF = positional_arguments[0]
+if stat.S_ISFIFO(os.fstat(0).st_mode):
+    input_file = "-"
 else:
-    if len(positional_arguments) > 2:
-        print("suf: Too many arguments")
+    if not len(positional_arguments):
+        print(f"suf: Missing operand")
         sys.exit(1)
-    SUF = positional_arguments[0]
-    input_file = positional_arguments[1]
+
+    input_file = positional_arguments.pop()
+
+if positional_arguments:
+    suffix = positional_arguments.pop(0)
+else:
+    suffix = ""
+
+if positional_arguments:
+    print(f"suf: '{positional_arguments[0]}': Extra operand")
+    sys.exit(1)
 
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()
@@ -104,9 +106,9 @@ for line in all_lines:
         SKIP_HEADER = False
         print(line)
         continue
-    if EXPRESSION:
-        os.environ["LINE"] = line
-        print(f"{line}{SEPARATOR}{os.popen(SUF).read()[:-1]}")
-        os.environ["LINE"] = ""
+    if EXSUFSSION:
+        os.environ["line"] = line
+        print(f"{line}{SEPARATOR}{os.popen(suffix).read()[:-1]}")
+        os.environ["line"] = ""
         continue
-    print(f"{line}{SEPARATOR}{SUF}")
+    print(f"{line}{SEPARATOR}{suffix}")

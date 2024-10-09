@@ -41,7 +41,7 @@ for option in options:
         print("For full documentation, try 'man TOOL_NAME'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("TOOL_NAME (DSVUtils) v1.0.0")
+        print("TOOL_NAME (TextUtils) v1.0.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."

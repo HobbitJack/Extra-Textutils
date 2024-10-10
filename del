@@ -1,0 +1,157 @@
+#!/usr/bin/python
+# delete lines containing filter strings
+
+import getopt
+import stat
+import os
+import sys
+import string
+
+SEPARATOR = "\t"
+EXACT = False
+FIELDS = False
+LOOSE = False
+NEGATE = False
+STARTS_WITH = False
+ENDS_WITH = False
+
+short_options = "eflns:wWhv"
+long_options = [
+    "exact",
+    "fields",
+    "loose",
+    "negate",
+    "separator=",
+    "start-with",
+    "end-with",
+    "help",
+    "version",
+]
+
+try:
+    options, positional_arguments = getopt.gnu_getopt(
+        sys.argv[1:], short_options, long_options
+    )
+except getopt.GetoptError as error:
+    print(f"del: '-{error.opt}': Option not recognized")
+    sys.exit(1)
+
+for option in options:
+    argument = option[1]
+    option = option[0]
+
+    if option == "-h" or option == "--help":
+        print("Usage: del [OPTION]... [FILTER]... [FILE]")
+        print("Remove all lines containing any FILTER")
+        print("")
+        print("  -e, --exact                  only match to entire lines/fields")
+        print(
+            "  -f, --fields                 match against each field individually instead of entire line"
+        )
+        print(
+            "  -l, --loose                  match loosely even with other modes selected, overrides -e"
+        )
+        print("  -n, --negate                 only remove non-matching lines")
+        print(
+            "  -s, --separator=SEPARATOR    use SEPARATOR instead of tab to separate fields"
+        )
+        print("  -w, --start-with             only remove lines starting with FILTER")
+        print("  -W, --end-with               only remove lines ending with FILTER")
+        print("  -h, --help                   display this help and exit")
+        print("  -v, --version                display version information and exit")
+        print()
+        print("For full documentation, try 'man del'.")
+        sys.exit(0)
+    elif option == "-v" or option == "--version":
+        print("del (TextUtils) v1.0.0")
+        print("Copyright (C) 2024 HobbitJack.")
+        print(
+            "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
+        )
+        print("This is free software: you are free to change and redistribute it.")
+        print("There is NO WARRANTY, to the extent permitted by law.")
+        print()
+        print("Written by HobbitJack.")
+        sys.exit(0)
+    elif option == "-e" or option == "--exact":
+        EXACT = True
+    elif option == "-f" or option == "--fields":
+        FIELDS = True
+    elif option == "-l" or option == "--loose":
+        LOOSE = True
+    elif option == "-n" or option == "--negate":
+        NEGATE = True
+    elif option == "-s" or option == "--separator":
+        SEPARATOR = argument
+    elif option == "-w" or option == "--start-with":
+        STARTS_WITH = True
+    elif option == "-W" or option == "--end-with":
+        ENDS_WITH = True
+
+FILTER = lambda line: not any(
+    (filter_str in line) for filter_str in positional_arguments
+)
+
+
+FILTER = lambda line: NEGATE ^ (
+    not any(
+        (
+            (
+                any(
+                    (
+                        (
+                            filter_str in field
+                            and (LOOSE or not (EXACT or STARTS_WITH or ENDS_WITH))
+                        )
+                        or (field == filter_str and EXACT)
+                        or (field.startswith(filter_str) and STARTS_WITH)
+                        or ((field.endswith(filter_str) and ENDS_WITH))
+                    )
+                    for field in line.split(SEPARATOR)
+                )
+                and FIELDS
+            )
+            or (
+                (
+                    (
+                        filter_str in line
+                        and (LOOSE or not (EXACT or STARTS_WITH or ENDS_WITH))
+                    )
+                    or (line == filter_str and EXACT)
+                    or (line.startswith(filter_str) and STARTS_WITH)
+                    or (line.endswith(filter_str) and ENDS_WITH)
+                )
+                and not FIELDS
+            )
+        )
+        for filter_str in positional_arguments
+    )
+)
+
+if stat.S_ISFIFO(os.fstat(0).st_mode):
+    input_file = "-"
+else:
+    if not len(positional_arguments):
+        print(f"del: Missing operand")
+        sys.exit(1)
+
+    input_file = positional_arguments.pop()
+
+if input_file == "-":
+    all_lines = sys.stdin.read().splitlines()
+else:
+    if os.path.isfile(input_file):
+        pass
+    elif os.path.isfile(f"{os.getcwd}/{input_file}"):
+        input_file = f"{os.getcwd}/{input_file}"
+    elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
+        print(f"del: {input_file}: Is a directory")
+        sys.exit(1)
+    else:
+        print(f"del: {input_file}: No such file or directory")
+        sys.exit(1)
+
+    with open(input_file, mode="r", encoding="utf8") as text_file:
+        all_lines = text_file.read().splitlines()
+
+print("\n".join(filter(FILTER, all_lines)))

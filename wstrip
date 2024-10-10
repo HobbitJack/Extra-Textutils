@@ -25,7 +25,7 @@ try:
         sys.argv[1:], short_options, long_options
     )
 except getopt.GetoptError as error:
-    print(f"wst: '-{error.opt}': Option not recognized")
+    print(f"wstrip: '-{error.opt}': Option not recognized")
     sys.exit(1)
 
 for option in options:
@@ -33,8 +33,8 @@ for option in options:
     option = option[0]
 
     if option == "-h" or option == "--help":
-        print("Usage: wst [OPTION]... [FILE]")
-        print("       wst -f [OPTION]... [FIELD]... [FILE]")
+        print("Usage: wstrip [OPTION]... [FILE]")
+        print("       wstrip -f [OPTION]... [FIELD]... [FILE]")
         print("Strip leading and trailing whitespace from fields in a file")
         print()
         print("  -f, --fields     only strip whitespace from each FIELD, overrides -l")
@@ -42,10 +42,10 @@ for option in options:
         print("  -h, --help       display this help and exit")
         print("  -v, --version    display version information and exit")
         print()
-        print("For full documentation, try 'man wst'.")
+        print("For full documentation, try 'man wstrip'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("wst (TextUtils) v1.0.0")
+        print("wstrip (TextUtils) v1.0.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
@@ -69,13 +69,13 @@ if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
 else:
     if not len(positional_arguments):
-        print(f"wst: Missing operand")
+        print(f"wstrip: Missing operand")
         sys.exit(1)
 
     input_file = positional_arguments.pop()
 
 if positional_arguments and not FIELDS:
-    print(f"wst: '{positional_arguments[0]}': Extra operand")
+    print(f"wstrip: '{positional_arguments[0]}': Extra operand")
     sys.exit(1)
 elif FIELDS:
     FIELDS = [-1]
@@ -84,7 +84,7 @@ for field in positional_arguments:
     try:
         FIELDS.append(int(field))
     except ValueError:
-        print(f"wst: {field}: Invalid field")
+        print(f"wstrip: {field}: Invalid field")
         sys.exit(1)
 
 if input_file == "-":
@@ -95,10 +95,10 @@ else:
     elif os.path.isfile(f"{os.getcwd}/{input_file}"):
         input_file = f"{os.getcwd}/{input_file}"
     elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
-        print(f"wst: {input_file}: Is a directory")
+        print(f"wstrip: {input_file}: Is a directory")
         sys.exit(1)
     else:
-        print(f"wst: {input_file}: No such file or directory")
+        print(f"wstrip: {input_file}: No such file or directory")
         sys.exit(1)
 
     with open(input_file, mode="r", encoding="utf8") as text_file:

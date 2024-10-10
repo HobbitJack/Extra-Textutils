@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# template program for textutile
+# template program for textutils
 
 import getopt
 import stat

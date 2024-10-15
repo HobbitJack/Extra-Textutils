@@ -8,11 +8,13 @@ import sys
 import string
 
 SEPARATOR = "\t"
+STRIP = True
 fields = False
 
-short_options = "s:hv"
+short_options = "s:whv"
 long_options = [
     "separator=",
+    "whitespace",
     "help",
     "version",
 ]
@@ -36,6 +38,7 @@ for option in options:
         print(
             "  -s, --separator=SEPARATOR    use SEPARATOR instead of tab to separate fields"
         )
+        print("  -w, --whitespace             treat whitespace as a valid form fill")
         print("  -h, --help                   display this help and exit")
         print("  -v, --version                display version information and exit")
         print()
@@ -54,6 +57,8 @@ for option in options:
         sys.exit(0)
     elif option == "-s" or option == "--separator":
         SEPARATOR = argument
+    elif option == "-w" or option == "--whitespace":
+        STRIP = False
 
 if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
@@ -94,9 +99,12 @@ else:
 for line in all_lines:
     line = line.split(SEPARATOR)
     if fields:
-        for part_num, part in line:
-            if (part_num + 1) in fields and not part:
-                continue
-    elif any(not part for part in line):
-        continue
-    print(SEPARATOR.join(line))
+        for field in fields:
+            if len(line) < field or not (
+                line[field - 1].strip() if STRIP else line[field - 1]
+            ):
+                break
+        else:
+            print(SEPARATOR.join(line))
+    elif all((part.strip() if STRIP else part) for part in line):
+        print(SEPARATOR.join(line))

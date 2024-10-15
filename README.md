@@ -8,7 +8,11 @@ So, many tools have options to either treat each field separately, or treat the 
 
 # TOOLS
 aff -- Add an affix to each line of input
+
 del -- Remove lines containing any filter string
+
 fdel -- remove lines with empty fields
+
 ror -- Re-order fields in each line of input
+
 wstrip -- Strip whitespace from each field of input

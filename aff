@@ -12,11 +12,11 @@ SEPARATOR = ""
 SKIP_HEADER = False
 SUFFIX = False
 
-short_options = "esSthv"
+short_options = "eHsSthv"
 long_options = [
     "expression",
-    "space",
     "skip-header",
+    "space",
     "suffix",
     "tab",
     "help",

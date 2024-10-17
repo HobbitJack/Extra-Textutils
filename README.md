@@ -15,4 +15,4 @@ fdel -- remove lines with empty fields
 
 ror -- Re-order fields in each line of input
 
-wstrip -- Strip whitespace from each field of input
+wstrip -- Strip whitespace from each line of input

@@ -7,10 +7,10 @@ import os
 import sys
 import string
 
-short_options = "fls:hv"
+short_options = "fF:ls:hv"
 long_options = [
+    "field",
     "fields",
-    "line",
     "separator=",
     "help",
     "version",
@@ -34,13 +34,17 @@ for option in options:
 
     if option == "-h" or option == "--help":
         print("Usage: wstrip [OPTION]... [FILE]")
-        print("       wstrip -f [OPTION]... [FIELD]... [FILE]")
-        print("Strip leading and trailing whitespace from fields in a file")
+        print("Strip leading and trailing whitespace from each line of input")
         print()
-        print("  -f, --fields     only strip whitespace from each FIELD, overrides -l")
-        print("  -l, --line       only strip whitespace at start and end of each line")
-        print("  -h, --help       display this help and exit")
-        print("  -v, --version    display version information and exit")
+        print(
+            "  -f, --field                  strip whitespace from each field in the line"
+        )
+        print(
+            "  -F, --fields=FIELDS          only strip whitespace from each field in FIELDS"
+        )
+        print("  -s, --separator=SEPARATOR    separate fields with SEPARATOR")
+        print("  -h, --help                   display this help and exit")
+        print("  -v, --version                display version information and exit")
         print()
         print("For full documentation, try 'man wstrip'.")
         sys.exit(0)
@@ -55,15 +59,25 @@ for option in options:
         print()
         print("Written by HobbitJack.")
         sys.exit(0)
-    elif option == "-f" or option == "--fields":
+    elif option == "-f" or option == "--field":
         FIELDS = True
-    elif option == "-l" or option == "--line":
-        LINE_MODE = True
+    elif option == "-F" or option == "--fields":
+        FIELDS = []
+        try:
+            for field in argument.split(","):
+                if "-" in field:
+                    for i in range(
+                        int(field.split("-")[0]), int(field.split("-")[1]) + 1
+                    ):
+                        FIELDS.append(i)
+                else:
+                    FIELDS.append(int(field))
+        except ValueError:
+            print(f"wstrip: {argument}: Invalid field selection")
+            sys.exit(1)
+
     elif option == "-s" or option == "--separator":
         SEPARATOR = argument
-
-if FIELDS and LINE_MODE:
-    LINE_MODE = False
 
 if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
@@ -74,18 +88,9 @@ else:
 
     input_file = positional_arguments.pop()
 
-if positional_arguments and not FIELDS:
+if positional_arguments:
     print(f"wstrip: '{positional_arguments[0]}': Extra operand")
     sys.exit(1)
-elif FIELDS:
-    FIELDS = [-1]
-
-for field in positional_arguments:
-    try:
-        FIELDS.append(int(field))
-    except ValueError:
-        print(f"wstrip: {field}: Invalid field")
-        sys.exit(1)
 
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()
@@ -105,12 +110,10 @@ else:
         all_lines = text_file.read().splitlines()
 
 for line in all_lines:
-    if LINE_MODE:
-        print(line.strip())
-
-    elif FIELDS:
+    if FIELDS:
         for field, value in enumerate(line.split(SEPARATOR)):
-            if (field := field + 1) in FIELDS:
+            field += 1
+            if FIELDS is True or field in FIELDS:
                 print(value.strip(), end="")
             else:
                 print(value, end="")
@@ -119,13 +122,5 @@ for line in all_lines:
                 print(SEPARATOR, end="")
             else:
                 print()
-
     else:
-        for field, value in enumerate(line.split(SEPARATOR)):
-            field += 1
-            print(value.strip(), end="")
-
-            if field != len(line.split(SEPARATOR)):
-                print(SEPARATOR, end="")
-            else:
-                print()
+        print(line.strip())

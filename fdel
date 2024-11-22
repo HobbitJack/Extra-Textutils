@@ -38,7 +38,7 @@ for option in options:
         print(
             "  -s, --separator=SEPARATOR    use SEPARATOR instead of tab to separate fields"
         )
-        print("  -w, --whitespace             treat whitespace as a valid form fill")
+        print("  -w, --whitespace             treat whitespace as a valid field fill")
         print("  -h, --help                   display this help and exit")
         print("  -v, --version                display version information and exit")
         print()

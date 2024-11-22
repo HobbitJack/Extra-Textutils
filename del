@@ -14,11 +14,13 @@ LOOSE = False
 NEGATE = False
 STARTS_WITH = False
 ENDS_WITH = False
+KEEP_HEADER = False
 
-short_options = "eflns:wWhv"
+short_options = "efklnS:wWhv"
 long_options = [
     "exact",
     "fields",
+    "keep-header",
     "loose",
     "negate",
     "separator=",
@@ -48,6 +50,7 @@ for option in options:
         print(
             "  -f, --fields                 match against each field individually instead of entire line"
         )
+        print("  -k, --keep-header            treat the first line as a header")
         print(
             "  -l, --loose                  match loosely even with other modes selected, overrides -e"
         )
@@ -77,11 +80,13 @@ for option in options:
         EXACT = True
     elif option == "-f" or option == "--fields":
         FIELDS = True
+    elif option == "-k" or option == "--keep-header":
+        KEEP_HEADER = True
     elif option == "-l" or option == "--loose":
         LOOSE = True
     elif option == "-n" or option == "--negate":
         NEGATE = True
-    elif option == "-s" or option == "--separator":
+    elif option == "-S" or option == "--separator":
         SEPARATOR = argument
     elif option == "-w" or option == "--start-with":
         STARTS_WITH = True
@@ -154,4 +159,7 @@ else:
     with open(input_file, mode="r", encoding="utf8") as text_file:
         all_lines = text_file.read().splitlines()
 
-print("\n".join(filter(FILTER, all_lines)))
+if KEEP_HEADER:
+    print(all_lines[0])
+
+print("\n".join(filter(FILTER, all_lines[1 if KEEP_HEADER else 0 :])))

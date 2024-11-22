@@ -7,8 +7,9 @@ import os
 import sys
 import string
 
-short_options = "fF:ls:hv"
+short_options = "efF:ls:hv"
 long_options = [
+    "empty-line",
     "field",
     "fields",
     "separator=",
@@ -19,6 +20,7 @@ long_options = [
 FIELDS = False
 LINE_MODE = False
 SEPARATOR = "\t"
+EMPTY_LINES = False
 
 try:
     options, positional_arguments = getopt.gnu_getopt(
@@ -36,6 +38,7 @@ for option in options:
         print("Usage: wstrip [OPTION]... [FILE]")
         print("Strip leading and trailing whitespace from each line of input")
         print()
+        print("  -e, --empty-line             also strip empty lines")
         print(
             "  -f, --field                  strip whitespace from each field in the line"
         )
@@ -59,6 +62,8 @@ for option in options:
         print()
         print("Written by HobbitJack.")
         sys.exit(0)
+    elif option == "-e" or option == "--empty-lines":
+        EMPTY_LINES = True
     elif option == "-f" or option == "--field":
         FIELDS = True
     elif option == "-F" or option == "--fields":
@@ -110,6 +115,8 @@ else:
         all_lines = text_file.read().splitlines()
 
 for line in all_lines:
+    if (line.strip() == "") and EMPTY_LINES:
+        continue
     if FIELDS:
         for field, value in enumerate(line.split(SEPARATOR)):
             field += 1

@@ -51,7 +51,7 @@ for option in options:
         print("For full documentation, try 'man ror'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("ror (TextUtils) v1.1.0")
+        print("ror (TextUtils) v1.3.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
@@ -109,9 +109,22 @@ for field in positional_arguments:
         sys.exit(1)
 
 if positional_arguments:
-    fields = list(int(field) for field in positional_arguments)
-    if REVERSE:
-        fields = list(reversed(fields))
+    fields = []
+        try:
+            for field in positional_arguments:
+                if "-" in field:
+                    for i in range(
+                        int(field.split("-")[0]), int(field.split("-")[1]) + 1
+                    ):
+                        FIELDS.append(i)
+                else:
+                    FIELDS.append(int(field))
+        except ValueError:
+            print(f"ror: {argument}: Invalid field selection")
+            sys.exit(1)
+            
+if REVERSE:
+    fields = list(reversed(fields))
 
 if fields:
     if FIRST:

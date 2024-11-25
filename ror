@@ -110,19 +110,17 @@ for field in positional_arguments:
 
 if positional_arguments:
     fields = []
-        try:
-            for field in positional_arguments:
-                if "-" in field:
-                    for i in range(
-                        int(field.split("-")[0]), int(field.split("-")[1]) + 1
-                    ):
-                        FIELDS.append(i)
-                else:
-                    FIELDS.append(int(field))
-        except ValueError:
-            print(f"ror: {argument}: Invalid field selection")
-            sys.exit(1)
-            
+    try:
+        for field in positional_arguments:
+            if "-" in field:
+                for i in range(int(field.split("-")[0]), int(field.split("-")[1]) + 1):
+                    FIELDS.append(i)
+            else:
+                FIELDS.append(int(field))
+    except ValueError:
+        print(f"ror: {argument}: Invalid field selection")
+        sys.exit(1)
+
 if REVERSE:
     fields = list(reversed(fields))
 

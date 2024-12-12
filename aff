@@ -5,17 +5,20 @@ import getopt
 import stat
 import os
 import sys
-import string
 
-EXPRESSION = False
+PYTHON_EXPRESSION = False
+SHELL_EXPRESSION = False
 SEPARATOR = ""
 SKIP_HEADER = False
 SUFFIX = False
+NUMBER_FROM = 0
 
-short_options = "eHsSthv"
+short_options = "eEHn:sSthv"
 long_options = [
     "expression",
+    "shell-expr",
     "skip-header",
+    "number-from=",
     "space",
     "suffix",
     "tab",
@@ -39,8 +42,15 @@ for option in options:
         print("Usage: aff [OPTION]... [AFFIX] [FILE]")
         print("Add AFFIX to each line of input")
         print()
-        print("  -e, --expression     execute AFFIX as a shell command for each line")
+        print(
+            "  -e, --expression     execute AFFIX as a python expression for each line"
+        )
+        print("                       also count up from 0 in 'i'")
+        print("  -E, --shell-expr     execute AFFIX as a shell command for each line")
+        print("                       also count up from 0 in 'I'")
         print("  -H, --skip-header    do not put AFFIX on the first line of input")
+        print("  -n, --number-from=NUM")
+        print("                       start counting from NUM instead of 0")
         print("  -s, --space          place a space between AFFIX and each line")
         print("  -S, --suffix         treat AFFIX as a suffix rather than as a prefix")
         print("  -t, --tab            place a tab between AFFIX and each line")
@@ -50,7 +60,7 @@ for option in options:
         print("For full documentation, try 'man aff'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("aff (TextUtils) v1.0.0")
+        print("aff (TextUtils) v2.0.1")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
@@ -63,7 +73,15 @@ for option in options:
     elif option == "-H" or option == "--skip-header":
         SKIP_HEADER = True
     elif option == "-e" or option == "--expression":
-        EXPRESSION = True
+        PYTHON_EXPRESSION = True
+    elif option == "-E" or option == "--shell-expe":
+        SHELL_EXPRESSION = True
+    elif option == "-n" or option == "--number-from":
+        try:
+            NUMBER_FROM = int(argument)
+        except ValueError:
+            print(f"aff: {argument}: Invalid starting number")
+            sys.exit(1)
     elif option == "-s" or option == "--space":
         SEPARATOR = " "
     elif option == "-S" or option == "--suffix":
@@ -75,7 +93,7 @@ if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
 else:
     if not len(positional_arguments):
-        print(f"aff: Missing operand")
+        print("aff: Missing operand")
         sys.exit(1)
 
     input_file = positional_arguments.pop()
@@ -85,8 +103,9 @@ if positional_arguments:
 else:
     affix = ""
 
-if EXPRESSION:
+if PYTHON_EXPRESSION or SHELL_EXPRESSION:
     command = affix
+    i = NUMBER_FROM
 
 if positional_arguments:
     print(f"aff: '{positional_arguments[0]}': Extra operand")
@@ -109,15 +128,22 @@ else:
     with open(input_file, mode="r", encoding="utf8") as text_file:
         all_lines = text_file.read().splitlines()
 
+
 for line in all_lines:
     if SKIP_HEADER:
         SKIP_HEADER = False
         print(line)
         continue
-    if EXPRESSION:
+
+    if PYTHON_EXPRESSION:
+        affix = eval(command)
+    elif SHELL_EXPRESSION:
         os.environ["line"] = line
+        os.environ["I"] = str(i)
         affix = os.popen(command).read()[:-1]
         os.environ["line"] = ""
+
+    i += 1
     if SUFFIX:
         print(f"{line}{SEPARATOR}{affix}")
     else:

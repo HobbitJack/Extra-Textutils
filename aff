@@ -49,7 +49,7 @@ for option in options:
         print(
             "  -E, --shell-expr             execute AFFIX as a shell command for each line"
         )
-        print("                               also count up from 0 in 'I'")
+        print("                               also count up from 0 in '$I'")
         print(
             "  -H, --skip-header            do not put AFFIX on the first line of input"
         )
@@ -67,7 +67,7 @@ for option in options:
         print("For full documentation, try 'man aff'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("aff (TextUtils) v2.0.2")
+        print("aff (TextUtils) v2.0.3")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."

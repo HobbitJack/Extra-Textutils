@@ -16,7 +16,7 @@ STARTS_WITH = False
 ENDS_WITH = False
 KEEP_HEADER = False
 
-short_options = "efklnS:wWhv"
+short_options = "efklns:wWhv"
 long_options = [
     "exact",
     "fields",
@@ -86,7 +86,7 @@ for option in options:
         LOOSE = True
     elif option == "-n" or option == "--negate":
         NEGATE = True
-    elif option == "-S" or option == "--separator":
+    elif option == "-s" or option == "--separator":
         SEPARATOR = argument
     elif option == "-w" or option == "--start-with":
         STARTS_WITH = True

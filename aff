@@ -43,24 +43,31 @@ for option in options:
         print("Add AFFIX to each line of input")
         print()
         print(
-            "  -e, --expression     execute AFFIX as a python expression for each line"
+            "  -e, --expression             execute AFFIX as a python expression for each line"
         )
-        print("                       also count up from 0 in 'i'")
-        print("  -E, --shell-expr     execute AFFIX as a shell command for each line")
-        print("                       also count up from 0 in 'I'")
-        print("  -H, --skip-header    do not put AFFIX on the first line of input")
-        print("  -n, --number-from=NUM")
-        print("                       start counting from NUM instead of 0")
-        print("  -s, --space          place a space between AFFIX and each line")
-        print("  -S, --suffix         treat AFFIX as a suffix rather than as a prefix")
-        print("  -t, --tab            place a tab between AFFIX and each line")
-        print("  -h, --help           display this help and exit")
-        print("  -v, --version        display version information and exit")
+        print("                               also count up from 0 in 'i'")
+        print(
+            "  -E, --shell-expr             execute AFFIX as a shell command for each line"
+        )
+        print("                               also count up from 0 in 'I'")
+        print(
+            "  -H, --skip-header            do not put AFFIX on the first line of input"
+        )
+        print("  -n, --number-from=NUM        start counting from NUM instead of 0")
+        print(
+            "  -s, --space                  place a space between AFFIX and each line"
+        )
+        print(
+            "  -S, --suffix                 treat AFFIX as a suffix rather than as a prefix"
+        )
+        print("  -t, --tab                    place a tab between AFFIX and each line")
+        print("  -h, --help                   display this help and exit")
+        print("  -v, --version                display version information and exit")
         print()
         print("For full documentation, try 'man aff'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("aff (TextUtils) v2.0.1")
+        print("aff (TextUtils) v2.0.2")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."

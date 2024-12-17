@@ -9,18 +9,16 @@ import sys
 SEPARATOR = "\t"
 EXACT = False
 FIELDS = False
-LOOSE = False
 NEGATE = False
 STARTS_WITH = False
 ENDS_WITH = False
 KEEP_HEADER = False
 
-short_options = "efklns:wWhv"
+short_options = "efkns:wWhv"
 long_options = [
     "exact",
     "fields",
     "keep-header",
-    "loose",
     "negate",
     "separator=",
     "start-with",
@@ -50,9 +48,6 @@ for option in options:
             "  -f, --fields                 match against each field individually instead of entire line"
         )
         print("  -k, --keep-header            treat the first line as a header")
-        print(
-            "  -l, --loose                  match loosely even with other modes selected, overrides -e"
-        )
         print("  -n, --negate                 only remove non-matching lines")
         print(
             "  -s, --separator=SEPARATOR    use SEPARATOR instead of tab to separate fields"
@@ -81,8 +76,6 @@ for option in options:
         FIELDS = True
     elif option == "-k" or option == "--keep-header":
         KEEP_HEADER = True
-    elif option == "-l" or option == "--loose":
-        LOOSE = True
     elif option == "-n" or option == "--negate":
         NEGATE = True
     elif option == "-s" or option == "--separator":
@@ -105,7 +98,7 @@ FILTER = lambda line: NEGATE ^ (
                     (
                         (
                             filter_str in field
-                            and (LOOSE or not (EXACT or STARTS_WITH or ENDS_WITH))
+                            and (not (EXACT or STARTS_WITH or ENDS_WITH))
                         )
                         or (field == filter_str and EXACT)
                         or (field.startswith(filter_str) and STARTS_WITH)
@@ -117,10 +110,7 @@ FILTER = lambda line: NEGATE ^ (
             )
             or (
                 (
-                    (
-                        filter_str in line
-                        and (LOOSE or not (EXACT or STARTS_WITH or ENDS_WITH))
-                    )
+                    (filter_str in line and (not (EXACT or STARTS_WITH or ENDS_WITH)))
                     or (line == filter_str and EXACT)
                     or (line.startswith(filter_str) and STARTS_WITH)
                     or (line.endswith(filter_str) and ENDS_WITH)

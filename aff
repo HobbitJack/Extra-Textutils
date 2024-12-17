@@ -144,13 +144,14 @@ for line in all_lines:
 
     if PYTHON_EXPRESSION:
         affix = eval(command)
+        i += 1
     elif SHELL_EXPRESSION:
         os.environ["line"] = line
         os.environ["I"] = str(i)
         affix = os.popen(command).read()[:-1]
         os.environ["line"] = ""
+        i += 1
 
-    i += 1
     if SUFFIX:
         print(f"{line}{SEPARATOR}{affix}")
     else:

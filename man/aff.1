@@ -1,0 +1,62 @@
+.TH AFF "1" "December 2024" "TextUtils v2.0.3" "User Commands"
+.SH NAME
+aff \- add an affix to each input line
+.SH SYNOPSIS
+.B aff
+[\fI\,OPTION\/\fR]... [\fI\,AFFIX\/\fR] [\fI\,FILE\/\fR]
+.SH DESCRIPTION
+Add AFFIX to each line of input, by default as a prefix.
+.TP
+\fB\-e\fR, \fB\-\-expression\fR
+Execute AFFIX as a python expression for each line.
+The variable 'i' can be used in your expression, and contains the 0-indexed line number.
+The value \fBreturned\fR by the expression will be appended to each line.
+Uses 'eval' and so should be used with caution.
+Mutually exclusive with -E/--shell-expr.
+.TP
+\fB\-E\fR, \fB\-\-shell\-expr\fR
+Execute AFFIX as a shell command for each line.
+The environment variable '$AFF_LINE_NUM' can be used in your expression, and contains the 0-indexed line number.
+In effect, this sticks the STDOUT of your expression as the affix.
+Mutually exclusive with -e/--expression.
+.TP
+\fB\-H\fR, \fB\-\-skip\-header\fR
+Treat the first line as a header, and do not apply the affix to it.
+This header line will in effect be echoed uneditted to STDOUT.
+.TP
+\fB\-n\fR, \fB\-\-number\-from\fR=\fI\,NUM\/\fR
+When in -e or -E mode, start counting the line number variable from NUM as opposed to 0.
+Allows for a simple offset when using the line number for math, for example.
+Note that the line number starts at 0 for the first modified line.
+I.e. -B/--skip-header will cause counting to start at the second line rather than the first.
+.TP
+\fB\-s\fR, \fB\-\-space\fR
+Calculate or apply the AFFIX placing a standard space ' ' between the affix and the line.
+Applies for both a prefix (default) or as a suffix (-S/--suffix).
+.TP
+\fB\-S\fR, \fB\-\-suffix\fR
+Apply AFFIX as a suffix (i.e. at the end of the input line) rather than as an affix (i.e. at the start of the input line).
+The line's original newline will be removed and placed after the suffix.
+.TP
+\fB\-t\fR, \fB\-\-tab\fR
+Calculate or apply the AFFIX placing a standard tab '\\t' between the affix and the line.
+Applies for both a prefix (default) or as a suffix (-S/--suffix).
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display a short help message and exit.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Display a version information message and exit.
+.PP
+.SH AUTHOR
+Written by HobbitJack.
+.SH COPYRIGHT
+Copyright \(co 2024 HobbitJack.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH BUGS
+This program acts like \fBsponge(1)\fR in that it collects all input first before doing anything.
+This is a Python thing and is a limitation of the standard I/O routines.
+If you want to e.g. timestamp STDIN, this program is unable to do that.

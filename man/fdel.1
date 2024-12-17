@@ -1,0 +1,32 @@
+.TH FDEL "1" "December 2024" "TextUtils v1.0.0" "User Commands"
+.SH NAME
+fdel \- delete lines with empty fields
+.SH SYNOPSIS
+.B fdel
+[\fI\,OPTION\/\fR]... [\fI\,FIELD\/\fR]... [\fI\,FILE\/\fR]
+.SH DESCRIPTION
+Remove lines with any tab-delimited field consisting only of whitespace characters.
+Alternatively, remove lines with any of the specified FIELDs containing only whitespace.
+.TP
+\fB\-s\fR, \fB\-\-separator\fR=\fI\,SEPARATOR\/\fR
+Use SEPARATOR as the field delimiter instead of the default tab ('\\t').
+.TP
+\fB\-w\fR, \fB\-\-whitespace\fR
+Only delete fields if any of the desired fields are absolutely empty.
+That is, fields that consist exactly of two successive separator characters without any whitespace or text between.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display a short help message and exit.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Display a version information message and exit.
+.PP
+For full documentation, try 'man fdel'.
+.SH AUTHOR
+Written by HobbitJack.
+.SH COPYRIGHT
+Copyright \(co 2024 HobbitJack.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.

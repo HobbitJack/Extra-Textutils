@@ -1,0 +1,40 @@
+.TH ROR "1" "December 2024" "TextUtils v1.3.0" "User Commands"
+.SH NAME
+ror \- reorder fields in a file
+.SH SYNOPSIS
+.B ror
+[\fI\,OPTION\/\fR]... [\fI\,FIELD\/\fR]... [\fI\,FILE\/\fR]
+.SH DESCRIPTION
+Re\-order fields in a file.
+Without any FIELDs specified, copy STDIN to STDOUT.
+Otherwise, copy only tab-delimited FIELDs specified, in the order they are specified, to STDOUT.
+.TP
+\fB\-f\fR, \fB\-\-first\fR=\fI\,FIELDS\/\fR
+Move FIELDS to the start of each line without otherwise affecting the ordering.
+.TP
+\fB\-l\fR, \fB\-\-last\fR=\fI\,FIELDS\/\fR
+Move FIELDS to the end of each line without otherwise affecting the ordering.
+.TP
+\fB\-r\fR, \fB\-\-reverse\fR
+If no FIELDs are specified, reverse the order of all fields in the input line.
+Otherwise, reverse the order of the specified FIELDs and only copy those fields to STDOUT.
+.TP
+\fB\-s\fR, \fB\-\-separator\fR=\fI\,SEPARATOR\/\fR
+Use SEPARATOR as the field delimiter instead of the default tab ('\\t').
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display a short help message and exit.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Display a version information message and exit.
+.PP
+.SH AUTHOR
+Written by HobbitJack.
+.SH COPYRIGHT
+Copyright \(co 2024 HobbitJack.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+\fBawk(1)\fR, \fBcut(1)\fR

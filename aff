@@ -67,7 +67,7 @@ for option in options:
         print("For full documentation, try 'man aff'.")
         sys.exit(0)
     elif option == "-v" or option == "--version":
-        print("aff (TextUtils) v2.0.3")
+        print("aff (Extra Textutils) v1.0.0")
         print("Copyright (C) 2024 HobbitJack.")
         print(
             "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."

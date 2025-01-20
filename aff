@@ -146,10 +146,10 @@ for line in all_lines:
         affix = eval(command)
         i += 1
     elif SHELL_EXPRESSION:
-        os.environ["line"] = line
+        os.environ["LINE"] = line
         os.environ["I"] = str(i)
         affix = os.popen(command).read()[:-1]
-        os.environ["line"] = ""
+        os.environ["LINE"] = ""
         i += 1
 
     if SUFFIX:

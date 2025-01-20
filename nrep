@@ -1,0 +1,90 @@
+#!/usr/bin/python
+# replace the first/last instances of a string with another string
+
+import getopt
+import stat
+import os
+import sys
+
+LAST = False
+
+short_options = "lhv"
+long_options = [
+    "last",
+    "help",
+    "version",
+]
+
+try:
+    options, positional_arguments = getopt.gnu_getopt(
+        sys.argv[1:], short_options, long_options
+    )
+except getopt.GetoptError as error:
+    print(f"nrep: '-{error.opt}': Option not recognized")
+    sys.exit(1)
+
+for option in options:
+    argument = option[1]
+    option = option[0]
+
+    if option == "-h" or option == "--help":
+        print("Usage: nrep [OPTION]... STR1 STR2 N")
+        print("Replace first N instances of STR1 with STR2.")
+        print()
+        print(
+            "  -l, --last                   replace last N instances instead of first N"
+        )
+        print("  -h, --help                   display this help and exit")
+        print("  -v, --version                display version information and exit")
+        print()
+        print("For full documentation, try 'man nrep'.")
+        sys.exit(0)
+    elif option == "-v" or option == "--version":
+        print("nrep (Extra Textutils) v1.0.0")
+        print("Copyright (C) 2024 HobbitJack.")
+        print(
+            "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>."
+        )
+        print("This is free software: you are free to change and redistribute it.")
+        print("There is NO WARRANTY, to the extent permitted by law.")
+        print()
+        print("Written by HobbitJack.")
+        sys.exit(0)
+    elif option == "-l" or option == "--last":
+        LAST = True
+
+if len(positional_arguments) < 3:
+    print("nrep: Missing operand")
+    sys.exit(1)
+
+if len(positional_arguments) > 3:
+    print(f"nrep: '{positional_arguments[3]}': Extra operand")
+    sys.exit(1)
+
+try:
+
+    num_instance = positional_arguments.pop()
+    num_instance = int(num_instance)
+except ValueError:
+    print(f"nrep: {num_instance}: Invalid number of replacements")
+    sys.exit(1)
+
+str_2 = positional_arguments.pop()
+str_1 = positional_arguments.pop()
+
+if not stat.S_ISFIFO(os.fstat(0).st_mode):
+    sys.exit(0)
+all_lines = sys.stdin.read().splitlines()
+
+for line in all_lines:
+    if LAST:
+        line = str(reversed(line))
+        str_1 = str(reversed(str_1))
+        str_2 = str(reversed(str_2))
+
+    line.replace(str_1, str_2, num_instance)
+
+    if LAST:
+        line = str(reversed(line))
+
+    print(line)

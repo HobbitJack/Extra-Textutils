@@ -27,7 +27,7 @@ try:
         sys.argv[1:], short_options, long_options
     )
 except getopt.GetoptError as error:
-    print(f"ror: '-{error.opt}': Option not recognized")
+    print(f"ror: '-{error.opt}': Option not recognized", file=sys.stderr)
     sys.exit(1)
 
 for option in options:
@@ -71,7 +71,7 @@ for option in options:
                 else:
                     FIRST.append(int(field))
         except ValueError:
-            print(f"ror: {argument}: Invalid field selection")
+            print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
             sys.exit(1)
     elif option == "-l" or option == "--last":
         try:
@@ -84,7 +84,7 @@ for option in options:
                 else:
                     LAST.append(int(field))
         except ValueError:
-            print(f"ror: {argument}: Invalid field selection")
+            print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
             sys.exit(1)
     elif option == "-r" or option == "--reverse":
         REVERSE = True
@@ -95,7 +95,7 @@ if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
 else:
     if not len(positional_arguments):
-        print(f"ror: Missing operand")
+        print(f"ror: Missing operand", file=sys.stderr)
         sys.exit(1)
     else:
         input_file = positional_arguments.pop()
@@ -104,7 +104,7 @@ for field in positional_arguments:
     try:
         field = int(field)
     except ValueError:
-        print(f"ror: {field}: Invalid field")
+        print(f"ror: {field}: Invalid field", file=sys.stderr)
         sys.exit(1)
 
 if positional_arguments:
@@ -117,7 +117,7 @@ if positional_arguments:
             else:
                 fields.append(int(field))
     except ValueError:
-        print(f"ror: {argument}: Invalid field selection")
+        print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
         sys.exit(1)
 
 if REVERSE and fields:
@@ -139,10 +139,10 @@ else:
     elif os.path.isfile(f"{os.getcwd}/{input_file}"):
         input_file = f"{os.getcwd}/{input_file}"
     elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
-        print(f"ror: {input_file}: Is a directory")
+        print(f"ror: {input_file}: Is a directory", file=sys.stderr)
         sys.exit(1)
     else:
-        print(f"ror: {input_file}: No such file or directory")
+        print(f"ror: {input_file}: No such file or directory", file=sys.stderr)
         sys.exit(1)
 
     with open(input_file, mode="r", encoding="utf8") as text_file:

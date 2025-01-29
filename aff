@@ -16,7 +16,7 @@ NUMBER_FROM = 0
 short_options = "eEHn:sSthv"
 long_options = [
     "expression",
-    "shell-expr",
+    "shell-expression",
     "skip-header",
     "number-from=",
     "space",
@@ -31,7 +31,7 @@ try:
         sys.argv[1:], short_options, long_options
     )
 except getopt.GetoptError as error:
-    print(f"aff: '-{error.opt}': Option not recognized")
+    print(f"aff: '-{error.opt}': Option not recognized", file=sys.stderr)
     sys.exit(1)
 
 for option in options:
@@ -47,7 +47,7 @@ for option in options:
         )
         print("                               also count up from 0 in 'i'")
         print(
-            "  -E, --shell-expr             execute AFFIX as a shell command for each line"
+            "  -E, --shell-expression       execute AFFIX as a shell command for each line"
         )
         print("                               also count up from 0 in '$I'")
         print(
@@ -87,7 +87,7 @@ for option in options:
         try:
             NUMBER_FROM = int(argument)
         except ValueError:
-            print(f"aff: {argument}: Invalid starting number")
+            print(f"aff: {argument}: Invalid starting number", file=sys.stderr)
             sys.exit(1)
     elif option == "-s" or option == "--space":
         SEPARATOR = " "
@@ -100,7 +100,7 @@ if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
 else:
     if not len(positional_arguments):
-        print("aff: Missing operand")
+        print("aff: Missing operand", file=sys.stderr)
         sys.exit(1)
 
     input_file = positional_arguments.pop()
@@ -115,7 +115,7 @@ if PYTHON_EXPRESSION or SHELL_EXPRESSION:
     i = NUMBER_FROM
 
 if positional_arguments:
-    print(f"aff: '{positional_arguments[0]}': Extra operand")
+    print(f"aff: '{positional_arguments[0]}': Extra operand", file=sys.stderr)
     sys.exit(1)
 
 if input_file == "-":
@@ -126,10 +126,10 @@ else:
     elif os.path.isfile(f"{os.getcwd}/{input_file}"):
         input_file = f"{os.getcwd}/{input_file}"
     elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
-        print(f"aff: {input_file}: Is a directory")
+        print(f"aff: {input_file}: Is a directory", file=sys.stderr)
         sys.exit(1)
     else:
-        print(f"aff: {input_file}: No such file or directory")
+        print(f"aff: {input_file}: No such file or directory", file=sys.stderr)
         sys.exit(1)
 
     with open(input_file, mode="r", encoding="utf8") as text_file:

@@ -23,7 +23,7 @@ try:
         sys.argv[1:], short_options, long_options
     )
 except getopt.GetoptError as error:
-    print(f"fdel: '-{error.opt}': Option not recognized")
+    print(f"fdel: '-{error.opt}': Option not recognized", file=sys.stderr)
     sys.exit(1)
 
 for option in options:
@@ -63,7 +63,7 @@ if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
 else:
     if not len(positional_arguments):
-        print(f"fdel: Missing operand")
+        print(f"fdel: Missing operand, file=sys.stderr")
         sys.exit(1)
 
     input_file = positional_arguments.pop()
@@ -72,7 +72,7 @@ for field in positional_arguments:
     try:
         field = int(field)
     except ValueError:
-        print(f"ror: {field}: Invalid field")
+        print(f"ror: {field}: Invalid field", file=sys.stderr)
         sys.exit(1)
 
 if positional_arguments:
@@ -86,10 +86,10 @@ else:
     elif os.path.isfile(f"{os.getcwd}/{input_file}"):
         input_file = f"{os.getcwd}/{input_file}"
     elif os.path.isdir(input_file) or os.path.isdir(f"{os.getcwd}/{input_file}"):
-        print(f"fdel: {input_file}: Is a directory")
+        print(f"fdel: {input_file}: Is a directory", file=sys.stderr)
         sys.exit(1)
     else:
-        print(f"fdel: {input_file}: No such file or directory")
+        print(f"fdel: {input_file}: No such file or directory", file=sys.stderr)
         sys.exit(1)
 
     with open(input_file, mode="r", encoding="utf8") as text_file:

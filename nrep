@@ -20,7 +20,7 @@ try:
         sys.argv[1:], short_options, long_options
     )
 except getopt.GetoptError as error:
-    print(f"nrep: '-{error.opt}': Option not recognized")
+    print(f"nrep: '-{error.opt}': Option not recognized", file=sys.stderr)
     sys.exit(1)
 
 for option in options:
@@ -54,11 +54,11 @@ for option in options:
         LAST = True
 
 if len(positional_arguments) < 3:
-    print("nrep: Missing operand")
+    print("nrep: Missing operand", file=sys.stderr)
     sys.exit(1)
 
 if len(positional_arguments) > 3:
-    print(f"nrep: '{positional_arguments[3]}': Extra operand")
+    print(f"nrep: '{positional_arguments[3]}': Extra operand", file=sys.stderr)
     sys.exit(1)
 
 try:
@@ -66,7 +66,7 @@ try:
     num_instance = positional_arguments.pop()
     num_instance = int(num_instance)
 except ValueError:
-    print(f"nrep: {num_instance}: Invalid number of replacements")
+    print(f"nrep: {num_instance}: Invalid number of replacements", file=sys.stderr)
     sys.exit(1)
 
 str_2 = positional_arguments.pop()

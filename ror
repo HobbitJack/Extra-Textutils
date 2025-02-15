@@ -8,13 +8,18 @@ import sys
 
 SEPARATOR = "\t"
 REVERSE = False
-fields = False
+FIELDS = False
 FIRST = []
 LAST = []
+DELETE = []
+INTERLEAVE = None
 
-short_options = "f:l:rs:hv"
+short_options = "d:f:iIl:rs:hv"
 long_options = [
+    "delete=",
     "first=",
+    "interleave",
+    "deinterleave",
     "last=",
     "reverse",
     "separator=",
@@ -38,7 +43,12 @@ for option in options:
         print("Usage: ror [OPTION]... [FIELD]... [FILE]")
         print("Re-order fields in a file")
         print()
+        print("  -d, --delete=FIELDS          delete FIELDS")
         print("  -f, --first=FIELDS           move FIELDS to the start of each row")
+        print(
+            "  -i, --interleave             interleave first and second half of fields"
+        )
+        print("  -I, --deinterleave           deinterleave fields into two halves")
         print("  -l, --last=FIELDS            move FIELDS to the end of each row")
         print("  -r, --reverse                reverse order of all fields ")
         print(
@@ -60,6 +70,19 @@ for option in options:
         print()
         print("Written by HobbitJack.")
         sys.exit(0)
+    elif option == "-d" or option == "--delete":
+        try:
+            for field in argument.split(","):
+                if "-" in field:
+                    for i in range(
+                        int(field.split("-")[0]), int(field.split("-")[1]) + 1
+                    ):
+                        DELETE.append(i)
+                else:
+                    DELETE.append(int(field))
+        except ValueError:
+            print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
+            sys.exit(1)
     elif option == "-f" or option == "--first":
         try:
             for field in argument.split(","):
@@ -73,6 +96,10 @@ for option in options:
         except ValueError:
             print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
             sys.exit(1)
+    elif option == "-i" or option == "--interleave":
+        INTERLEAVE = True
+    elif option == "-I" or option == "--deinterleave":
+        INTERLEAVE = False
     elif option == "-l" or option == "--last":
         try:
             for field in argument.split(","):
@@ -100,36 +127,18 @@ else:
     else:
         input_file = positional_arguments.pop()
 
-for field in positional_arguments:
-    try:
-        field = int(field)
-    except ValueError:
-        print(f"ror: {field}: Invalid field", file=sys.stderr)
-        sys.exit(1)
+FIELDS = []
+try:
+    for field in positional_arguments:
+        if "-" in field:
+            for i in range(int(field.split("-")[0]), int(field.split("-")[1]) + 1):
+                FIELDS.append(i)
+        else:
+            FIELDS.append(int(field))
+except ValueError:
+    print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
+    sys.exit(1)
 
-if positional_arguments:
-    fields = []
-    try:
-        for field in positional_arguments:
-            if "-" in field:
-                for i in range(int(field.split("-")[0]), int(field.split("-")[1]) + 1):
-                    fields.append(i)
-            else:
-                fields.append(int(field))
-    except ValueError:
-        print(f"ror: {argument}: Invalid field selection", file=sys.stderr)
-        sys.exit(1)
-
-if REVERSE and fields:
-    fields = list(reversed(fields))
-
-if fields:
-    if FIRST:
-        for field in reversed(FIRST):
-            fields.insert(0, field)
-    if LAST:
-        for field in LAST:
-            fields.append(field)
 
 if input_file == "-":
     all_lines = sys.stdin.read().splitlines()
@@ -148,33 +157,44 @@ else:
     with open(input_file, mode="r", encoding="utf8") as text_file:
         all_lines = text_file.read().splitlines()
 
+
+if not FIELDS:
+    FIELDS = range(1, max(len(line.split(SEPARATOR)) for line in all_lines) + 1)
+
+fields = FIRST[:]
+
+main_fields = list(
+    field for field in FIELDS if (field not in fields) and (field not in LAST)
+)
+
+if REVERSE:
+    main_fields = reversed(main_fields)
+
+if INTERLEAVE:
+    num_main = len(main_fields)
+    if num_main % 2:
+        fields.append(main_fields.pop(0))
+        num_main -= 1
+
+    num_main //= 2
+
+    for index in range(num_main):
+        fields.append(main_fields[index])
+        fields.append(main_fields[num_main + index])
+elif INTERLEAVE is False:
+    fields.extend(field for index, field in enumerate(main_fields) if not (index % 2))
+    fields.extend(field for index, field in enumerate(main_fields) if index % 2)
+else:
+    fields.extend(main_fields)
+
+fields.extend(LAST)
+
 for line in all_lines:
     line = line.split(SEPARATOR)
-    if not fields:
-        if REVERSE:
-            print(SEPARATOR.join(reversed(line)))
-
-        elif FIRST or LAST:
-
-            line_fields = FIRST[:]
-            for field in range(len(line)):
-                field += 1
-                if (field not in FIRST) and (field not in LAST):
-                    line_fields.append(field)
-            for field in LAST:
-                line_fields.append(field)
-            print(
-                SEPARATOR.join(
-                    line[field - 1] if field <= len(line) else ""
-                    for field in line_fields
-                )
-            )
-
-        else:
-            print(SEPARATOR.join(line))
-    else:
-        print(
-            SEPARATOR.join(
-                line[field - 1] if field <= len(line) else "" for field in fields
-            )
+    print(
+        SEPARATOR.join(
+            line[field - 1] if field <= len(line) else ""
+            for field in fields
+            if field not in DELETE
         )
+    )

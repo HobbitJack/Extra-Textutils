@@ -182,6 +182,8 @@ if INTERLEAVE:
         fields.append(main_fields[index])
         fields.append(main_fields[num_main + index])
 elif INTERLEAVE is False:
+    if len(main_fields) % 2:
+        fields.append(main_fields.pop(0))
     fields.extend(field for index, field in enumerate(main_fields) if not (index % 2))
     fields.extend(field for index, field in enumerate(main_fields) if index % 2)
 else:

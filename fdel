@@ -63,7 +63,7 @@ if stat.S_ISFIFO(os.fstat(0).st_mode):
     input_file = "-"
 else:
     if not len(positional_arguments):
-        print(f"fdel: Missing operand, file=sys.stderr")
+        print("fdel: Missing operand", file=sys.stderr)
         sys.exit(1)
 
     input_file = positional_arguments.pop()
